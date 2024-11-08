@@ -1,6 +1,7 @@
 import logging
 
-from langchain.chains import LLMChain
+# from langchain.chains import LLMChain
+from langchain_core.runnables import RunnableSequence
 from langchain.llms.base import BaseLLM
 from langchain.prompts import load_prompt
 
@@ -25,11 +26,16 @@ def plan_tasks(
     task_planning_prompt_template = load_prompt(
         get_prompt_resource("task-planning-few-shot-prompt.json")
     )
-    llm_chain = LLMChain(prompt=task_planning_prompt_template, llm=llm)
+    llm_chain = RunnableSequence(task_planning_prompt_template | llm)
     history_truncated = truncate_history(history)
-    output = llm_chain.predict(
-        user_input=user_input, history=history_truncated, stop=["<im_end>"]
-    )
+    print(history_truncated)
+    print(user_input)
+    input_data = {
+	"history": history_truncated,
+	"user_input": user_input
+
+    }
+    output = llm_chain.invoke(input_data)
     logger.info(f"Task planning raw output: {output}")
     tasks = parse_tasks(output)
     return tasks
