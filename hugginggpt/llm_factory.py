@@ -2,9 +2,9 @@ import logging
 from collections import namedtuple
 
 import tiktoken
-from langchain import OpenAI
+from langchain_openai import OpenAI
 
-LLM_NAME = "text-davinci-003"
+LLM_NAME = "gpt-4"
 # Encoding for text-davinci-003
 ENCODING_NAME = "p50k_base"
 ENCODING = tiktoken.get_encoding(ENCODING_NAME)
@@ -40,7 +40,7 @@ def create_llms() -> LLMs:
         model_name=LLM_NAME,
         temperature=0,
         logit_bias={
-            token_id: TASK_PLANNING_LOGIT_BIAS
+            str(token_id): TASK_PLANNING_LOGIT_BIAS
             for token_id in task_parsing_highlight_ids
         },
     )
@@ -48,7 +48,7 @@ def create_llms() -> LLMs:
         model_name=LLM_NAME,
         temperature=0,
         logit_bias={
-            token_id: MODEL_SELECTION_LOGIT_BIAS
+            str(token_id): MODEL_SELECTION_LOGIT_BIAS
             for token_id in choose_model_highlight_ids
         },
     )
