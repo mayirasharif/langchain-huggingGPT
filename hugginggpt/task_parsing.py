@@ -65,16 +65,16 @@ class Task(BaseModel):
 
 
 class Tasks(BaseModel):
-    __root__: list[Task] = Field(description="List of Machine Learning tasks")
+    list__: list[Task] = Field(description="List of Machine Learning tasks")
 
     def __iter__(self):
-        return iter(self.__root__)
+        return iter(self.list__)
 
     def __getitem__(self, item):
-        return self.__root__[item]
+        return self.list__[item]
 
     def __len__(self):
-        return len(self.__root__)
+        return len(self.list__)
 
 
 @wrap_exceptions(TaskParsingException, "Failed to parse tasks")
@@ -87,7 +87,7 @@ def parse_tasks(tasks_str: str) -> list[Task]:
     # Cannot use PydanticOutputParser because it fails when parsing top level list JSON string
     tasks = Tasks.parse_raw(tasks_str)
     # __root__ extracts list[Task] from Tasks object
-    tasks = unfold(tasks.__root__)
+    tasks = unfold(tasks.list__)
     tasks = fix_dependencies(tasks)
     logger.info(f"Parsed tasks: {tasks}")
     return tasks
