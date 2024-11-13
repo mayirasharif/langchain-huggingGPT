@@ -96,10 +96,20 @@ def parse_tasks(tasks_str: str) -> list[Task]:
     tasks_str = tasks_str.strip()
     if tasks_str.endswith("<im_end>"):
         tasks_str = tasks_str[:-len("<im_end>")]
+    tasks_str = str(tasks_str)
+
+    #tasks_str = tasks_str.replace("'", '"')
+    
+    tasks_str = json.loads(tasks_str)
+
+    tasks_str = f'{{ "list__": {tasks_str} }}'
+
+    for i in range(10):
+        print(f'ITS A DANG {type(tasks_str)}!')
     # Cannot use PydanticOutputParser because it fails when parsing top level list JSON string
     tasks = Tasks.parse_raw(tasks_str)
     # __root__ extracts list[Task] from Tasks object
-    tasks = unfold(tasks.list__)
+    tasks = unfold(tasks)
     tasks = fix_dependencies(tasks)
     logger.info(f"Parsed tasks: {tasks}")
     return tasks
