@@ -37,7 +37,7 @@ def plan_tasks(
     }
     output = llm_chain.invoke(input_data)
     logger.info(f"Task planning raw output: {output}")
-    tasks = parse_tasks(output)
+    tasks = parse_tasks(output.content)
     return tasks
 
 

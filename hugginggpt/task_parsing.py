@@ -1,6 +1,6 @@
 import copy
 import logging
-
+import json
 from pydantic import BaseModel, Field
 
 from hugginggpt.exceptions import TaskParsingException, wrap_exceptions
@@ -83,7 +83,19 @@ def parse_tasks(tasks_str: str) -> list[Task]:
     if tasks_str == "[]":
         raise ValueError("Task string empty, cannot parse")
     logger.info(f"Parsing tasks string: {tasks_str}")
+
+    #tasks_str = tasks_str.content.split("<im_end>")[0]
+    #tasks_str = str(tasks_str)
+    #tasks_str = tasks_str.replace("'", '"')
+    #tasks_str = json.loads(tasks_str)
+    #for i in range(200):    
+    #    print(type(tasks_str))
+    #tasks_str = str(tasks_str)
+    #tasks_str = tasks_str.replace("'", '"')
+    #tasks_str = json.loads(tasks_str)
     tasks_str = tasks_str.strip()
+    if tasks_str.endswith("<im_end>"):
+        tasks_str = tasks_str[:-len("<im_end>")]
     # Cannot use PydanticOutputParser because it fails when parsing top level list JSON string
     tasks = Tasks.parse_raw(tasks_str)
     # __root__ extracts list[Task] from Tasks object

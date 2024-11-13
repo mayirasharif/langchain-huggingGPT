@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 
 import tiktoken
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 
 LLM_NAME = "gpt-4"
 # Encoding for text-davinci-003
@@ -12,7 +12,7 @@ ENCODING = tiktoken.get_encoding(ENCODING_NAME)
 LLM_MAX_TOKENS = 4096
 
 # As specified in huggingGPT paper
-TASK_PLANNING_LOGIT_BIAS = 0.1
+TASK_PLANNING_LOGIT_BIAS = 0
 MODEL_SELECTION_LOGIT_BIAS = 5
 
 logger = logging.getLogger(__name__)
@@ -35,26 +35,29 @@ def create_llms() -> LLMs:
 
     task_parsing_highlight_ids = get_token_ids_for_task_parsing()
     choose_model_highlight_ids = get_token_ids_for_choose_model()
-
-    task_planning_llm = OpenAI(
+    print(task_parsing_highlight_ids)
+    task_planning_llm = ChatOpenAI(
         model_name=LLM_NAME,
         temperature=0,
         logit_bias={
-            str(token_id): TASK_PLANNING_LOGIT_BIAS
+            str(int(token_id)): TASK_PLANNING_LOGIT_BIAS
             for token_id in task_parsing_highlight_ids
         },
     )
-    model_selection_llm = OpenAI(
-        model_name=LLM_NAME,
-        temperature=0,
-        logit_bias={
-            str(token_id): MODEL_SELECTION_LOGIT_BIAS
-            for token_id in choose_model_highlight_ids
-        },
-    )
-    model_inference_llm = OpenAI(model_name=LLM_NAME, temperature=0)
-    response_generation_llm = OpenAI(model_name=LLM_NAME, temperature=0)
-    output_fixing_llm = OpenAI(model_name=LLM_NAME, temperature=0)
+    try:
+        model_selection_llm = ChatOpenAI(
+            model_name=LLM_NAME,
+            temperature=0,
+            logit_bias={
+                str(int(token_id)): MODEL_SELECTION_LOGIT_BIAS
+                for token_id in choose_model_highlight_ids
+            },
+        )
+    except Exception:
+        print(task_parsing_highlight_ids)
+    model_inference_llm = ChatOpenAI(model_name=LLM_NAME, temperature=0)
+    response_generation_llm = ChatOpenAI(model_name=LLM_NAME, temperature=0)
+    output_fixing_llm = ChatOpenAI(model_name=LLM_NAME, temperature=0)
     return LLMs(
         task_planning_llm=task_planning_llm,
         model_selection_llm=model_selection_llm,
